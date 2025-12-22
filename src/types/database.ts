@@ -85,7 +85,8 @@ export interface Lead {
   next_follow_up: string | null;
   created_at: string;
   updated_at: string;
-  assigned_staff?: Staff;
+  is_enquiry?: boolean;
+  assigned_staff?: Partial<Staff> | { name: string };
 }
 
 export interface LeadNote {

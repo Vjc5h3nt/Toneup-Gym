@@ -101,6 +101,7 @@ export type Database = {
           fitness_goal: string | null
           id: string
           interest: Database["public"]["Enums"]["membership_type"] | null
+          is_enquiry: boolean | null
           name: string
           next_follow_up: string | null
           phone: string
@@ -119,6 +120,7 @@ export type Database = {
           fitness_goal?: string | null
           id?: string
           interest?: Database["public"]["Enums"]["membership_type"] | null
+          is_enquiry?: boolean | null
           name: string
           next_follow_up?: string | null
           phone: string
@@ -137,6 +139,7 @@ export type Database = {
           fitness_goal?: string | null
           id?: string
           interest?: Database["public"]["Enums"]["membership_type"] | null
+          is_enquiry?: boolean | null
           name?: string
           next_follow_up?: string | null
           phone?: string
