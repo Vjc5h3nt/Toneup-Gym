@@ -9,6 +9,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
+import LeadCalendar from "./pages/LeadCalendar";
 import Members from "./pages/Members";
 import StaffPage from "./pages/Staff";
 import Reports from "./pages/Reports";
@@ -36,6 +37,7 @@ const App = () => (
             >
               <Route index element={<Dashboard />} />
               <Route path="leads" element={<Leads />} />
+              <Route path="lead-calendar" element={<LeadCalendar />} />
               <Route path="members" element={<Members />} />
               <Route path="staff" element={<StaffPage />} />
               <Route path="reports" element={<Reports />} />

@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   Dumbbell,
+  CalendarDays,
   ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/dashboard/leads', icon: UserPlus, label: 'Leads' },
+  { to: '/dashboard/lead-calendar', icon: CalendarDays, label: 'Schedule' },
   { to: '/dashboard/members', icon: Users, label: 'Members' },
   { to: '/dashboard/staff', icon: UsersRound, label: 'Staff' },
   { to: '/dashboard/reports', icon: BarChart3, label: 'Reports' },
