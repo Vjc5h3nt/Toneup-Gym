@@ -2,3 +2,6 @@ project_id = "prjwgyvxedartvnmnhrb"
 
 [functions.submit-enquiry]
 verify_jwt = false
+
+[functions.public-trainers]
+verify_jwt = false

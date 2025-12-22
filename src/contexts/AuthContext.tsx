@@ -83,7 +83,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setStaff(staffData as Staff);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error fetching user data:', error);
+      }
     } finally {
       setIsLoading(false);
     }

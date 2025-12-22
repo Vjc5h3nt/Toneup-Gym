@@ -152,7 +152,9 @@ export default function Dashboard() {
       setMembershipData(formattedMembershipData);
       setAttendanceData(formattedAttendanceData);
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error fetching dashboard data:', error);
+      }
     } finally {
       setIsLoading(false);
     }
