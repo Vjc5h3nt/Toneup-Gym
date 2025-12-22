@@ -22,15 +22,17 @@ export default function Trainers() {
   }, []);
 
   const fetchTrainers = async () => {
-    const { data, error } = await supabase
-      .from('staff')
-      .select('id, name, photo_url, specialization, role')
-      .eq('is_active', true)
-      .in('role', ['trainer', 'manager'])
-      .order('name');
+    try {
+      // Use edge function to fetch trainers - avoids exposing table structure to anonymous users
+      const { data, error } = await supabase.functions.invoke('public-trainers');
 
-    if (!error && data) {
-      setTrainers(data);
+      if (!error && data) {
+        setTrainers(data);
+      }
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Error fetching trainers:', error);
+      }
     }
     setIsLoading(false);
   };
