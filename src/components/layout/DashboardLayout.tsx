@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -41,6 +42,9 @@ const navItems = [
 export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, staff, signOut, isAdmin } = useAuth();
+  
+  // Enable real-time notifications
+  useRealtimeNotifications();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
