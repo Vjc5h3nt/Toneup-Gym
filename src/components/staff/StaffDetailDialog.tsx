@@ -8,7 +8,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -23,7 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, subDays } from 'date-fns';
 import {
   User,
   Phone,
@@ -82,12 +81,14 @@ export default function StaffDetailDialog({
 
   const fetchAttendance = async (staffId: string) => {
     setIsLoading(true);
+    // Fetch attendance for past 2 days
+    const twoDaysAgo = format(subDays(new Date(), 2), 'yyyy-MM-dd');
     const { data, error } = await supabase
       .from('staff_attendance')
       .select('*')
       .eq('staff_id', staffId)
-      .order('date', { ascending: false })
-      .limit(30);
+      .gte('date', twoDaysAgo)
+      .order('date', { ascending: false });
 
     if (!error && data) {
       setAttendance(data as StaffAttendance[]);
@@ -162,6 +163,10 @@ export default function StaffDetailDialog({
   };
 
   if (!staff) return null;
+
+  // Check if today has an active session (checked in but not out)
+  const hasActiveSession = todayAttendance && !todayAttendance.out_time;
+  const hasCompletedToday = todayAttendance && todayAttendance.out_time;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -238,63 +243,81 @@ export default function StaffDetailDialog({
             </TabsContent>
 
             <TabsContent value="attendance" className="m-0 space-y-4">
-              {/* Quick Actions */}
+              {/* Quick Actions - Both Check In and Check Out */}
               <div className="flex gap-2">
-                {!todayAttendance ? (
-                  <Button onClick={handleCheckIn} className="gradient-primary">
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Check In
-                  </Button>
-                ) : !todayAttendance.out_time ? (
-                  <Button onClick={handleCheckOut} variant="secondary">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Check Out
-                  </Button>
-                ) : (
+                <Button 
+                  onClick={handleCheckIn} 
+                  className="gradient-primary"
+                  disabled={!!todayAttendance}
+                >
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Check In
+                </Button>
+                <Button 
+                  onClick={handleCheckOut} 
+                  variant="secondary"
+                  disabled={!hasActiveSession}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Check Out
+                </Button>
+                {hasCompletedToday && (
                   <Badge variant="outline" className="py-2 px-4">
                     <Clock className="mr-2 h-4 w-4" />
-                    Completed: {todayAttendance.hours_worked}h
+                    Today: {todayAttendance.hours_worked}h
                   </Badge>
                 )}
               </div>
 
-              {/* Attendance History */}
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>In Time</TableHead>
-                      <TableHead>Out Time</TableHead>
-                      <TableHead>Hours</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {isLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={4} className="text-center">
-                          Loading...
-                        </TableCell>
-                      </TableRow>
-                    ) : attendance.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={4} className="text-center text-muted-foreground">
-                          No attendance records
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      attendance.map((a) => (
-                        <TableRow key={a.id}>
-                          <TableCell>{format(parseISO(a.date), 'MMM d, yyyy')}</TableCell>
-                          <TableCell>{a.in_time || '-'}</TableCell>
-                          <TableCell>{a.out_time || '-'}</TableCell>
-                          <TableCell>{a.hours_worked ? `${a.hours_worked}h` : '-'}</TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+              <div className="mb-2">
+                <p className="text-sm text-muted-foreground">Showing attendance logs for the past 2 days</p>
               </div>
+
+              {/* Attendance History - Past 2 days */}
+              <ScrollArea className="h-[250px]">
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>In Time</TableHead>
+                        <TableHead>Out Time</TableHead>
+                        <TableHead>Hours</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {isLoading ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center">
+                            Loading...
+                          </TableCell>
+                        </TableRow>
+                      ) : attendance.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center text-muted-foreground">
+                            No attendance records in the past 2 days
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        attendance.map((a) => (
+                          <TableRow key={a.id}>
+                            <TableCell>{format(parseISO(a.date), 'MMM d, yyyy')}</TableCell>
+                            <TableCell>{a.in_time || '-'}</TableCell>
+                            <TableCell>{a.out_time || '-'}</TableCell>
+                            <TableCell>
+                              {a.hours_worked ? (
+                                <Badge variant="secondary">{a.hours_worked}h</Badge>
+                              ) : a.in_time && !a.out_time ? (
+                                <Badge>Active</Badge>
+                              ) : '-'}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </ScrollArea>
             </TabsContent>
 
             <TabsContent value="payroll" className="m-0 space-y-4">

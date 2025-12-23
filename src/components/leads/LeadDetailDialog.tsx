@@ -36,10 +36,7 @@ interface LeadDetailDialogProps {
 
 const statusFlow: Record<string, string[]> = {
   new: ['contacted'],
-  contacted: ['hot', 'warm', 'cold'],
-  hot: ['converted', 'warm', 'cold', 'lost'],
-  warm: ['hot', 'cold', 'converted', 'lost'],
-  cold: ['warm', 'lost'],
+  contacted: ['converted', 'lost'],
   converted: [],
   lost: [],
 };
@@ -47,9 +44,6 @@ const statusFlow: Record<string, string[]> = {
 const statusColors: Record<string, string> = {
   new: 'bg-info text-info-foreground',
   contacted: 'bg-warning text-warning-foreground',
-  hot: 'bg-destructive text-destructive-foreground',
-  warm: 'bg-amber-500 text-white',
-  cold: 'bg-sky-600 text-white',
   converted: 'bg-success text-success-foreground',
   lost: 'bg-muted text-muted-foreground',
 };
@@ -57,9 +51,6 @@ const statusColors: Record<string, string> = {
 const statusLabels: Record<string, string> = {
   new: 'New',
   contacted: 'Contacted',
-  hot: 'Hot 🔥',
-  warm: 'Warm',
-  cold: 'Cold',
   converted: 'Converted ✓',
   lost: 'Lost',
 };
@@ -108,7 +99,7 @@ export default function LeadDetailDialog({
 
     const { error } = await supabase
       .from('leads')
-      .update({ status: newStatus as 'new' | 'contacted' | 'hot' | 'warm' | 'cold' | 'converted' | 'lost' })
+      .update({ status: newStatus as 'new' | 'contacted' | 'converted' | 'lost' })
       .eq('id', lead.id);
 
     if (error) {

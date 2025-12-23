@@ -20,9 +20,6 @@ import LeadDetailDialog from '@/components/leads/LeadDetailDialog';
 const statusColors: Record<string, string> = {
   new: 'bg-info border-info',
   contacted: 'bg-warning border-warning',
-  hot: 'bg-destructive border-destructive',
-  warm: 'bg-primary border-primary',
-  cold: 'bg-muted border-muted-foreground',
   converted: 'bg-success border-success',
   lost: 'bg-muted border-muted-foreground',
 };
@@ -30,9 +27,6 @@ const statusColors: Record<string, string> = {
 const statusTextColors: Record<string, string> = {
   new: 'text-info-foreground',
   contacted: 'text-warning-foreground',
-  hot: 'text-destructive-foreground',
-  warm: 'text-primary-foreground',
-  cold: 'text-muted-foreground',
   converted: 'text-success-foreground',
   lost: 'text-muted-foreground',
 };
@@ -248,7 +242,7 @@ export default function LeadCalendar() {
 
       {/* Legend */}
       <div className="flex flex-wrap gap-3">
-        {['new', 'contacted', 'hot', 'warm', 'cold', 'converted', 'lost'].map((status) => (
+        {['new', 'contacted', 'converted', 'lost'].map((status) => (
           <Badge key={status} className={`${statusColors[status]} ${statusTextColors[status]}`}>
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Badge>

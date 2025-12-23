@@ -1,24 +1,20 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import type { Lead } from '@/types/database';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Phone, Calendar, ArrowRight } from 'lucide-react';
 import { format, isToday, isTomorrow, isPast } from 'date-fns';
-
-interface Lead {
-  id: string;
-  name: string;
-  phone: string;
-  next_follow_up: string;
-  status: string;
-}
+import { useNavigate } from 'react-router-dom';
+import LeadDetailDialog from '@/components/leads/LeadDetailDialog';
 
 export function UpcomingFollowUps() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,13 +25,13 @@ export function UpcomingFollowUps() {
     try {
       const { data } = await supabase
         .from('leads')
-        .select('id, name, phone, next_follow_up, status')
+        .select('*, assigned_staff:staff(name)')
         .not('next_follow_up', 'is', null)
         .not('status', 'in', '("converted","lost")')
         .order('next_follow_up', { ascending: true })
         .limit(10);
 
-      setLeads(data || []);
+      setLeads((data as Lead[]) || []);
     } catch (error) {
       console.error('Error fetching follow-ups:', error);
     } finally {
@@ -53,11 +49,16 @@ export function UpcomingFollowUps() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'hot': return 'bg-red-500/10 text-red-600 dark:text-red-400';
-      case 'warm': return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
-      case 'cold': return 'bg-sky-500/10 text-sky-600 dark:text-sky-400';
+      case 'new': return 'bg-info/10 text-info dark:text-info';
+      case 'contacted': return 'bg-warning/10 text-warning dark:text-warning';
+      case 'converted': return 'bg-success/10 text-success dark:text-success';
       default: return 'bg-muted text-muted-foreground';
     }
+  };
+
+  const handleLeadClick = (lead: Lead) => {
+    setSelectedLead(lead);
+    setDetailOpen(true);
   };
 
   if (isLoading) {
@@ -84,47 +85,56 @@ export function UpcomingFollowUps() {
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Upcoming Follow-ups</CardTitle>
-        <Button variant="ghost" size="sm" onClick={() => navigate('/lead-calendar')}>
-          View All <ArrowRight className="ml-1 h-4 w-4" />
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[300px]">
-          {leads.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No upcoming follow-ups</p>
-          ) : (
-            <div className="space-y-3">
-              {leads.map((lead) => {
-                const dateInfo = getDateLabel(lead.next_follow_up);
-                return (
-                  <div
-                    key={lead.id}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => navigate('/leads')}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium truncate">{lead.name}</p>
-                        <Badge variant="outline" className={getStatusColor(lead.status)}>
-                          {lead.status}
-                        </Badge>
+    <>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Upcoming Follow-ups</CardTitle>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/lead-calendar')}>
+            View All <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-[300px]">
+            {leads.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No upcoming follow-ups</p>
+            ) : (
+              <div className="space-y-3">
+                {leads.map((lead) => {
+                  const dateInfo = getDateLabel(lead.next_follow_up!);
+                  return (
+                    <div
+                      key={lead.id}
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => handleLeadClick(lead)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium truncate">{lead.name}</p>
+                          <Badge variant="outline" className={getStatusColor(lead.status)}>
+                            {lead.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Phone className="h-3 w-3" />
+                          {lead.phone}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Phone className="h-3 w-3" />
-                        {lead.phone}
-                      </div>
+                      <Badge variant={dateInfo.variant}>{dateInfo.label}</Badge>
                     </div>
-                    <Badge variant={dateInfo.variant}>{dateInfo.label}</Badge>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </ScrollArea>
-      </CardContent>
-    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </ScrollArea>
+        </CardContent>
+      </Card>
+
+      <LeadDetailDialog
+        lead={selectedLead}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        onUpdate={fetchFollowUps}
+      />
+    </>
   );
 }
