@@ -111,40 +111,40 @@ export default function LeadDetailDialog({
     setIsUpdating(false);
   };
 
-  const updateFollowUp = async () => {
+  const saveChanges = async () => {
     if (!lead) return;
     setIsUpdating(true);
 
-    const { error } = await supabase
+    // Update follow-up date
+    const { error: followUpError } = await supabase
       .from('leads')
       .update({ next_follow_up: followUpDate || null })
       .eq('id', lead.id);
 
-    if (error) {
+    if (followUpError) {
       toast.error('Failed to update follow-up date');
-    } else {
-      toast.success('Follow-up date updated');
-      onUpdate();
+      setIsUpdating(false);
+      return;
     }
-    setIsUpdating(false);
-  };
 
-  const addNote = async () => {
-    if (!lead || !newNote.trim()) return;
-    setIsUpdating(true);
+    // Add note if provided
+    if (newNote.trim()) {
+      const { error: noteError } = await supabase.from('lead_notes').insert({
+        lead_id: lead.id,
+        note: newNote.trim(),
+      });
 
-    const { error } = await supabase.from('lead_notes').insert({
-      lead_id: lead.id,
-      note: newNote.trim(),
-    });
-
-    if (error) {
-      toast.error('Failed to add note');
-    } else {
-      toast.success('Note added');
+      if (noteError) {
+        toast.error('Failed to add note');
+        setIsUpdating(false);
+        return;
+      }
       setNewNote('');
       fetchNotes(lead.id);
     }
+
+    toast.success('Changes saved');
+    onUpdate();
     setIsUpdating(false);
   };
 
@@ -236,23 +236,14 @@ export default function LeadDetailDialog({
             {/* Follow-up Date */}
             <div className="space-y-3">
               <Label className="text-base font-semibold">Next Follow-up</Label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    type="date"
-                    value={followUpDate}
-                    onChange={(e) => setFollowUpDate(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-                <Button
-                  onClick={updateFollowUp}
-                  disabled={isUpdating}
-                  variant="secondary"
-                >
-                  Save
-                </Button>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="date"
+                  value={followUpDate}
+                  onChange={(e) => setFollowUpDate(e.target.value)}
+                  className="pl-9"
+                />
               </div>
               {lead.next_follow_up && (
                 <p className="text-sm text-muted-foreground">
@@ -263,40 +254,20 @@ export default function LeadDetailDialog({
 
             <Separator />
 
-            {/* Notes Section */}
+            {/* Previous Notes */}
             <div className="space-y-3">
               <Label className="text-base font-semibold flex items-center gap-2">
                 <MessageSquare className="h-4 w-4" />
-                Notes & Activity
+                Previous Notes
               </Label>
-
-              {/* Add Note */}
-              <div className="flex gap-2">
-                <Textarea
-                  placeholder="Add a note about this lead..."
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
-                  className="min-h-[80px]"
-                />
-              </div>
-              <Button
-                onClick={addNote}
-                disabled={isUpdating || !newNote.trim()}
-                className="w-full"
-              >
-                <Send className="mr-2 h-4 w-4" />
-                Add Note
-              </Button>
-
-              {/* Notes List */}
-              <div className="space-y-3 mt-4">
+              <div className="space-y-3">
                 {isLoadingNotes ? (
                   <div className="text-center py-4 text-muted-foreground">
                     Loading notes...
                   </div>
                 ) : notes.length === 0 ? (
                   <div className="text-center py-4 text-muted-foreground">
-                    No notes yet. Add your first note above.
+                    No notes yet.
                   </div>
                 ) : (
                   notes.map((note) => (
@@ -314,6 +285,29 @@ export default function LeadDetailDialog({
                 )}
               </div>
             </div>
+
+            <Separator />
+
+            {/* Add New Note */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Add Note</Label>
+              <Textarea
+                placeholder="Add a note about this lead..."
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                className="min-h-[80px]"
+              />
+            </div>
+
+            {/* Save Button */}
+            <Button
+              onClick={saveChanges}
+              disabled={isUpdating}
+              className="w-full"
+            >
+              <Send className="mr-2 h-4 w-4" />
+              Save
+            </Button>
           </div>
         </ScrollArea>
       </DialogContent>
