@@ -35,6 +35,7 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
+  LogOut,
 } from 'lucide-react';
 import AddMembershipDialog from './AddMembershipDialog';
 import AddPaymentDialog from './AddPaymentDialog';
@@ -139,6 +140,31 @@ export default function MemberProfileSheet({
     }
   };
 
+  const handleCheckOut = async (attendanceId: string) => {
+    if (!member) return;
+
+    const { error } = await supabase
+      .from('member_attendance')
+      .update({ check_out_time: new Date().toISOString() })
+      .eq('id', attendanceId);
+
+    if (error) {
+      toast.error('Failed to check out');
+    } else {
+      toast.success('Member checked out');
+      fetchAttendance(member.id);
+    }
+  };
+
+  // Find today's active session (checked in but not checked out)
+  const todayActiveSession = attendance.find((a) => {
+    const checkInDate = parseISO(a.check_in_time);
+    const today = new Date();
+    return (
+      checkInDate.toDateString() === today.toDateString() && !a.check_out_time
+    );
+  });
+
   const filteredMemberships = memberships.filter((m) => {
     if (membershipFilter === 'all') return true;
     return m.status === membershipFilter;
@@ -206,10 +232,21 @@ export default function MemberProfileSheet({
 
             {/* Quick Actions */}
             <div className="flex gap-2 mt-4">
-              <Button size="sm" onClick={handleCheckIn} className="gradient-primary">
-                <LogIn className="mr-2 h-4 w-4" />
-                Check In
-              </Button>
+              {todayActiveSession ? (
+                <Button 
+                  size="sm" 
+                  variant="secondary" 
+                  onClick={() => handleCheckOut(todayActiveSession.id)}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Check Out
+                </Button>
+              ) : (
+                <Button size="sm" onClick={handleCheckIn} className="gradient-primary">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Check In
+                </Button>
+              )}
               <Button size="sm" variant="secondary" onClick={() => setAddPaymentOpen(true)}>
                 <CreditCard className="mr-2 h-4 w-4" />
                 Record Payment

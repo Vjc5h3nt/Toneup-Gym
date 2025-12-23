@@ -57,7 +57,7 @@ export default function AddPaymentDialog({
     const selected = memberships.find((m) => m.id === membershipId);
     setFormData({
       ...formData,
-      membership_id: membershipId,
+      membership_id: membershipId === 'none' ? '' : membershipId,
       amount: selected?.price || 0,
     });
   };
@@ -119,7 +119,7 @@ export default function AddPaymentDialog({
                   <SelectValue placeholder="Select membership" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No membership</SelectItem>
+                  <SelectItem value="none">No membership</SelectItem>
                   {activeMemberships.map((m) => (
                     <SelectItem key={m.id} value={m.id}>
                       {m.type.replace('_', ' ')} - ₹{m.price.toLocaleString()}
