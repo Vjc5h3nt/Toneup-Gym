@@ -53,9 +53,9 @@ export function UpcomingFollowUps() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'hot': return 'bg-destructive/10 text-destructive';
-      case 'warm': return 'bg-warning/10 text-warning';
-      case 'cold': return 'bg-info/10 text-info';
+      case 'hot': return 'bg-red-500/10 text-red-600 dark:text-red-400';
+      case 'warm': return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+      case 'cold': return 'bg-sky-500/10 text-sky-600 dark:text-sky-400';
       default: return 'bg-muted text-muted-foreground';
     }
   };

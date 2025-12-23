@@ -7,10 +7,10 @@ export function QuickActions() {
   const navigate = useNavigate();
 
   const actions = [
-    { label: 'Add Member', icon: UserPlus, onClick: () => navigate('/members'), color: 'bg-primary/10 text-primary hover:bg-primary/20' },
-    { label: 'Add Lead', icon: Users, onClick: () => navigate('/leads'), color: 'bg-accent/10 text-accent hover:bg-accent/20' },
-    { label: 'View Reports', icon: FileText, onClick: () => navigate('/reports'), color: 'bg-info/10 text-info hover:bg-info/20' },
-    { label: 'Lead Calendar', icon: Calendar, onClick: () => navigate('/lead-calendar'), color: 'bg-warning/10 text-warning hover:bg-warning/20' },
+    { label: 'Add Member', icon: UserPlus, path: '/members', color: 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 dark:text-emerald-400' },
+    { label: 'View Leads', icon: Users, path: '/leads', color: 'bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 dark:text-blue-400' },
+    { label: 'View Reports', icon: FileText, path: '/reports', color: 'bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 dark:text-purple-400' },
+    { label: 'Lead Calendar', icon: Calendar, path: '/lead-calendar', color: 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-400' },
   ];
 
   return (
@@ -22,10 +22,10 @@ export function QuickActions() {
         {actions.map((action) => (
           <Button
             key={action.label}
-            variant="ghost"
+            variant="outline"
             size="sm"
             className={action.color}
-            onClick={action.onClick}
+            onClick={() => navigate(action.path)}
           >
             <action.icon className="mr-2 h-4 w-4" />
             {action.label}

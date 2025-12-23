@@ -48,8 +48,8 @@ const statusColors: Record<string, string> = {
   new: 'bg-info text-info-foreground',
   contacted: 'bg-warning text-warning-foreground',
   hot: 'bg-destructive text-destructive-foreground',
-  warm: 'bg-primary text-primary-foreground',
-  cold: 'bg-muted text-muted-foreground',
+  warm: 'bg-amber-500 text-white',
+  cold: 'bg-sky-600 text-white',
   converted: 'bg-success text-success-foreground',
   lost: 'bg-muted text-muted-foreground',
 };

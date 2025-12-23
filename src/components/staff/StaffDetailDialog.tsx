@@ -168,8 +168,8 @@ export default function StaffDetailDialog({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <User className="h-6 w-6 text-primary" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10">
+              <User className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
               <DialogTitle className="text-2xl">{staff.name}</DialogTitle>
@@ -332,7 +332,7 @@ export default function StaffDetailDialog({
                           <TableCell>
                             <Badge
                               variant={p.status === 'paid' ? 'default' : 'outline'}
-                              className={p.status === 'paid' ? 'bg-success' : ''}
+                              className={p.status === 'paid' ? 'bg-green-500 text-white' : ''}
                             >
                               {p.status || 'pending'}
                             </Badge>

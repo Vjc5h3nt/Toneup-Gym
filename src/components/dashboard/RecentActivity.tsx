@@ -95,10 +95,10 @@ export function RecentActivity() {
 
   const getColor = (type: ActivityItem['type']) => {
     switch (type) {
-      case 'member': return 'bg-primary/10 text-primary';
-      case 'payment': return 'bg-success/10 text-success';
-      case 'lead': return 'bg-accent/10 text-accent';
-      case 'attendance': return 'bg-info/10 text-info';
+      case 'member': return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+      case 'payment': return 'bg-green-500/10 text-green-600 dark:text-green-400';
+      case 'lead': return 'bg-blue-500/10 text-blue-600 dark:text-blue-400';
+      case 'attendance': return 'bg-sky-500/10 text-sky-600 dark:text-sky-400';
     }
   };
 
