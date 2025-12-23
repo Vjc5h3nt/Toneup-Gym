@@ -21,9 +21,6 @@ import AddLeadDialog from '@/components/leads/AddLeadDialog';
 const statusColors: Record<string, string> = {
   new: 'bg-info text-info-foreground',
   contacted: 'bg-warning text-warning-foreground',
-  hot: 'bg-destructive text-destructive-foreground',
-  warm: 'bg-amber-500 text-white',
-  cold: 'bg-sky-600 text-white',
   converted: 'bg-success text-success-foreground',
   lost: 'bg-muted text-muted-foreground',
 };
@@ -31,9 +28,6 @@ const statusColors: Record<string, string> = {
 const statusLabels: Record<string, string> = {
   new: 'New',
   contacted: 'Contacted',
-  hot: 'Hot 🔥',
-  warm: 'Warm',
-  cold: 'Cold',
   converted: 'Converted ✓',
   lost: 'Lost',
 };
@@ -116,9 +110,6 @@ export default function Leads() {
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="new">New</SelectItem>
               <SelectItem value="contacted">Contacted</SelectItem>
-              <SelectItem value="hot">Hot</SelectItem>
-              <SelectItem value="warm">Warm</SelectItem>
-              <SelectItem value="cold">Cold</SelectItem>
               <SelectItem value="converted">Converted</SelectItem>
               <SelectItem value="lost">Lost</SelectItem>
             </SelectContent>
@@ -127,8 +118,8 @@ export default function Leads() {
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-        {['new', 'contacted', 'hot', 'warm', 'cold', 'converted', 'lost'].map((status) => {
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {['new', 'contacted', 'converted', 'lost'].map((status) => {
           const count = leads.filter((l) => l.status === status).length;
           return (
             <button

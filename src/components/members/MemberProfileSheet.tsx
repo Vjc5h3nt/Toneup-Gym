@@ -21,7 +21,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { toast } from 'sonner';
-import { format, parseISO, differenceInDays } from 'date-fns';
+import { format, parseISO, differenceInDays, subDays, isAfter } from 'date-fns';
 import {
   User,
   Phone,
@@ -58,8 +58,6 @@ const membershipStatusColors: Record<string, string> = {
 const membershipTypeLabels: Record<string, string> = {
   normal: 'Regular Gym',
   personal_training: 'Personal Training',
-  yoga: 'Yoga',
-  crossfit: 'CrossFit',
   other: 'Other',
 };
 
@@ -100,12 +98,14 @@ export default function MemberProfileSheet({
   };
 
   const fetchAttendance = async (memberId: string) => {
+    // Fetch attendance for past 2 days
+    const twoDaysAgo = subDays(new Date(), 2);
     const { data, error } = await supabase
       .from('member_attendance')
       .select('*')
       .eq('member_id', memberId)
-      .order('check_in_time', { ascending: false })
-      .limit(30);
+      .gte('check_in_time', twoDaysAgo.toISOString())
+      .order('check_in_time', { ascending: false });
 
     if (!error && data) {
       setAttendance(data as MemberAttendance[]);
@@ -172,6 +172,18 @@ export default function MemberProfileSheet({
 
   const activeMembership = memberships.find((m) => m.status === 'active');
 
+  // Calculate duration for each attendance record
+  const getAttendanceDuration = (record: MemberAttendance) => {
+    if (!record.check_out_time) return 'Active';
+    const checkIn = parseISO(record.check_in_time);
+    const checkOut = parseISO(record.check_out_time);
+    const diffMs = checkOut.getTime() - checkIn.getTime();
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
+
   if (!member) return null;
 
   return (
@@ -196,7 +208,7 @@ export default function MemberProfileSheet({
                     </Badge>
                     {activeMembership && (
                       <Badge className={membershipStatusColors[activeMembership.status]}>
-                        {membershipTypeLabels[activeMembership.type]}
+                        {membershipTypeLabels[activeMembership.type] || activeMembership.type}
                       </Badge>
                     )}
                   </div>
@@ -230,23 +242,26 @@ export default function MemberProfileSheet({
               )}
             </div>
 
-            {/* Quick Actions */}
+            {/* Quick Actions - Both Check In and Check Out */}
             <div className="flex gap-2 mt-4">
-              {todayActiveSession ? (
-                <Button 
-                  size="sm" 
-                  variant="secondary" 
-                  onClick={() => handleCheckOut(todayActiveSession.id)}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Check Out
-                </Button>
-              ) : (
-                <Button size="sm" onClick={handleCheckIn} className="gradient-primary">
-                  <LogIn className="mr-2 h-4 w-4" />
-                  Check In
-                </Button>
-              )}
+              <Button 
+                size="sm" 
+                onClick={handleCheckIn} 
+                className="gradient-primary"
+                disabled={!!todayActiveSession}
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Check In
+              </Button>
+              <Button 
+                size="sm" 
+                variant="secondary" 
+                onClick={() => todayActiveSession && handleCheckOut(todayActiveSession.id)}
+                disabled={!todayActiveSession}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Check Out
+              </Button>
               <Button size="sm" variant="secondary" onClick={() => setAddPaymentOpen(true)}>
                 <CreditCard className="mr-2 h-4 w-4" />
                 Record Payment
@@ -302,7 +317,7 @@ export default function MemberProfileSheet({
                         >
                           <div className="flex items-center justify-between">
                             <div className="font-semibold">
-                              {membershipTypeLabels[m.type]}
+                              {membershipTypeLabels[m.type] || m.type}
                             </div>
                             <Badge className={membershipStatusColors[m.status]}>
                               {m.status}
@@ -334,44 +349,68 @@ export default function MemberProfileSheet({
                 )}
               </TabsContent>
 
-              {/* Attendance Tab */}
+              {/* Attendance Tab - Past 2 days */}
               <TabsContent value="attendance" className="m-0 p-4">
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Check In</TableHead>
-                        <TableHead>Check Out</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {attendance.length === 0 ? (
+                <div className="mb-4">
+                  <p className="text-sm text-muted-foreground">Showing attendance logs for the past 2 days</p>
+                </div>
+                <ScrollArea className="h-[300px]">
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
                         <TableRow>
-                          <TableCell colSpan={3} className="text-center text-muted-foreground">
-                            No attendance records
-                          </TableCell>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Check In</TableHead>
+                          <TableHead>Check Out</TableHead>
+                          <TableHead>Duration</TableHead>
+                          <TableHead>Action</TableHead>
                         </TableRow>
-                      ) : (
-                        attendance.map((a) => (
-                          <TableRow key={a.id}>
-                            <TableCell>
-                              {format(parseISO(a.check_in_time), 'PP')}
-                            </TableCell>
-                            <TableCell>
-                              {format(parseISO(a.check_in_time), 'p')}
-                            </TableCell>
-                            <TableCell>
-                              {a.check_out_time
-                                ? format(parseISO(a.check_out_time), 'p')
-                                : '-'}
+                      </TableHeader>
+                      <TableBody>
+                        {attendance.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center text-muted-foreground">
+                              No attendance records in the past 2 days
                             </TableCell>
                           </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
+                        ) : (
+                          attendance.map((a) => (
+                            <TableRow key={a.id}>
+                              <TableCell>
+                                {format(parseISO(a.check_in_time), 'PP')}
+                              </TableCell>
+                              <TableCell>
+                                {format(parseISO(a.check_in_time), 'p')}
+                              </TableCell>
+                              <TableCell>
+                                {a.check_out_time
+                                  ? format(parseISO(a.check_out_time), 'p')
+                                  : '-'}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={a.check_out_time ? 'secondary' : 'default'}>
+                                  {getAttendanceDuration(a)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                {!a.check_out_time && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleCheckOut(a.id)}
+                                  >
+                                    <LogOut className="h-3 w-3 mr-1" />
+                                    Out
+                                  </Button>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </ScrollArea>
               </TabsContent>
 
               {/* Payments Tab */}
