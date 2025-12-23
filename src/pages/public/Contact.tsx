@@ -5,7 +5,7 @@ import { Phone, Mail, MapPin, Clock, MessageCircle, Instagram, Facebook } from '
 
 export default function Contact() {
   const whatsappNumber = '919876543210';
-  const whatsappMessage = encodeURIComponent('Hi! I have a question about SmartGym.');
+  const whatsappMessage = encodeURIComponent('Hi! I have a question about Toneup Gym.');
   
   // Google Maps embed coordinates (example: Mumbai)
   const mapEmbedUrl = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3770.0060!2d72.8777!3d19.0760!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDA0JzMzLjYiTiA3MsKwNTInMzkuNyJF!5e0!3m2!1sen!2sin!4v1234567890';
@@ -77,10 +77,10 @@ export default function Contact() {
                 </CardHeader>
                 <CardContent>
                   <a 
-                    href="mailto:info@smartgym.com" 
+                    href="mailto:info@toneupgym.com" 
                     className="text-primary hover:underline"
                   >
-                    info@smartgym.com
+                    info@toneupgym.com
                   </a>
                 </CardContent>
               </Card>
@@ -133,7 +133,7 @@ export default function Contact() {
                     allowFullScreen
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
-                    title="SmartGym Location"
+                    title="Toneup Gym Location"
                   />
                 </div>
               </Card>
