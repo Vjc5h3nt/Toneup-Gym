@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Dumbbell, Loader2 } from 'lucide-react';
+import { Dumbbell, Loader2, LogOut } from 'lucide-react';
 import { z } from 'zod';
 
 const authSchema = z.object({
@@ -21,16 +21,62 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, signOut, user, isLoading: authLoading, isStaff, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
 
-  // Redirect if already logged in
-  if (user) {
-    navigate(from, { replace: true });
-    return null;
+  // Redirect if already logged in AND has access
+  useEffect(() => {
+    if (user && (isStaff || isAdmin)) {
+      navigate(from, { replace: true });
+    }
+  }, [user, isStaff, isAdmin, navigate, from]);
+
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sidebar to-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show pending approval message if logged in but no access
+  if (user && !isStaff && !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sidebar to-background p-4">
+        <Card className="w-full max-w-md animate-fade-in">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+              <Loader2 className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+            </div>
+            <CardTitle className="text-2xl font-bold">Account Pending Approval</CardTitle>
+            <CardDescription>
+              Your account has been created but is waiting for admin approval. 
+              Please contact your administrator to get access.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-sm text-muted-foreground mb-4">
+              Logged in as: <span className="font-medium">{user.email}</span>
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={() => signOut()}
+              className="w-full"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const validateForm = () => {
