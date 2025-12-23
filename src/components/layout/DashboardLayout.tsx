@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
 import { Button } from '@/components/ui/button';
@@ -18,8 +18,11 @@ import {
   Dumbbell,
   CalendarDays,
   ChevronDown,
+  ChevronRight,
   Moon,
   Sun,
+  PanelLeftClose,
+  PanelLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -31,6 +34,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', end: true },
@@ -54,6 +62,8 @@ const navItems = [
 
 export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [reportsOpen, setReportsOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       return document.documentElement.classList.contains('dark');
@@ -61,10 +71,18 @@ export function DashboardLayout() {
     return false;
   });
   const { user, staff, signOut, isAdmin } = useAuth();
+  const location = useLocation();
   
   // Enable real-time notifications
   useRealtimeNotifications();
   const navigate = useNavigate();
+
+  // Auto-expand reports if on reports page
+  useEffect(() => {
+    if (location.pathname.includes('/dashboard/reports')) {
+      setReportsOpen(true);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     if (isDark) {
@@ -100,19 +118,22 @@ export function DashboardLayout() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform duration-300 lg:static lg:translate-x-0',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          'fixed inset-y-0 left-0 z-50 flex flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-300 lg:static lg:translate-x-0',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          sidebarCollapsed ? 'w-16' : 'w-64'
         )}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center gap-3 px-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+        <div className="flex h-16 items-center gap-3 px-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary flex-shrink-0">
             <Dumbbell className="h-5 w-5 text-primary-foreground" />
           </div>
-          <div>
-            <h1 className="font-semibold text-sidebar-foreground">SmartGym</h1>
-            <p className="text-xs text-sidebar-foreground/60">ERP System</p>
-          </div>
+          {!sidebarCollapsed && (
+            <div className="overflow-hidden">
+              <h1 className="font-semibold text-sidebar-foreground">SmartGym</h1>
+              <p className="text-xs text-sidebar-foreground/60">ERP System</p>
+            </div>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -130,35 +151,62 @@ export function DashboardLayout() {
           <nav className="flex flex-col gap-1">
             {navItems.map((item) => (
               item.subItems ? (
-                <div key={item.to} className="space-y-1">
-                  <NavLink
-                    to={item.to}
-                    onClick={() => setSidebarOpen(false)}
-                    className={({ isActive }) =>
-                      cn(
-                        'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                        isActive
+                <Collapsible
+                  key={item.to}
+                  open={reportsOpen}
+                  onOpenChange={setReportsOpen}
+                >
+                  <CollapsibleTrigger asChild>
+                    <button
+                      className={cn(
+                        'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                        location.pathname.includes('/dashboard/reports')
                           ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                           : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                      )
-                    }
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
-                  </NavLink>
-                  <div className="ml-7 space-y-1">
-                    {item.subItems.map((sub) => (
-                      <NavLink
-                        key={sub.to}
-                        to={sub.to}
-                        onClick={() => setSidebarOpen(false)}
-                        className="block rounded-md px-3 py-1.5 text-xs text-sidebar-foreground/60 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground transition-colors"
-                      >
-                        {sub.label}
-                      </NavLink>
-                    ))}
-                  </div>
-                </div>
+                      )}
+                    >
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      {!sidebarCollapsed && (
+                        <>
+                          <span className="flex-1 text-left">{item.label}</span>
+                          <ChevronRight
+                            className={cn(
+                              'h-4 w-4 transition-transform duration-200',
+                              reportsOpen && 'rotate-90'
+                            )}
+                          />
+                        </>
+                      )}
+                    </button>
+                  </CollapsibleTrigger>
+                  {!sidebarCollapsed && (
+                    <CollapsibleContent className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
+                      <div className="ml-7 mt-1 space-y-1 border-l border-sidebar-border pl-3">
+                        {item.subItems.map((sub) => {
+                          const subTabParam = sub.to.split('?tab=')[1];
+                          const currentTabParam = location.search.replace('?tab=', '');
+                          const isSubActive = location.pathname.includes('/dashboard/reports') && subTabParam === currentTabParam;
+                          
+                          return (
+                            <NavLink
+                              key={sub.to}
+                              to={sub.to}
+                              onClick={() => setSidebarOpen(false)}
+                              className={cn(
+                                'block rounded-md px-3 py-1.5 text-xs transition-colors',
+                                isSubActive
+                                  ? 'text-sidebar-foreground bg-sidebar-accent/50'
+                                  : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground'
+                              )}
+                            >
+                              {sub.label}
+                            </NavLink>
+                          );
+                        })}
+                      </div>
+                    </CollapsibleContent>
+                  )}
+                </Collapsible>
               ) : (
                 <NavLink
                   key={item.to}
@@ -173,9 +221,10 @@ export function DashboardLayout() {
                         : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
                     )
                   }
+                  title={sidebarCollapsed ? item.label : undefined}
                 >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
+                  <item.icon className="h-4 w-4 flex-shrink-0" />
+                  {!sidebarCollapsed && <span>{item.label}</span>}
                 </NavLink>
               )
             ))}
@@ -190,22 +239,29 @@ export function DashboardLayout() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3 px-3 py-6 text-sidebar-foreground hover:bg-sidebar-accent"
+                className={cn(
+                  'w-full justify-start gap-3 py-6 text-sidebar-foreground hover:bg-sidebar-accent',
+                  sidebarCollapsed ? 'px-2' : 'px-3'
+                )}
               >
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 flex-shrink-0">
                   <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex flex-1 flex-col items-start text-left">
-                  <span className="text-sm font-medium truncate max-w-[120px]">
-                    {staff?.name || user?.email}
-                  </span>
-                  <span className="text-xs text-sidebar-foreground/60 capitalize">
-                    {isAdmin ? 'Admin' : 'Staff'}
-                  </span>
-                </div>
-                <ChevronDown className="h-4 w-4 text-sidebar-foreground/60" />
+                {!sidebarCollapsed && (
+                  <>
+                    <div className="flex flex-1 flex-col items-start text-left overflow-hidden">
+                      <span className="text-sm font-medium truncate max-w-[120px]">
+                        {staff?.name || user?.email}
+                      </span>
+                      <span className="text-xs text-sidebar-foreground/60 capitalize">
+                        {isAdmin ? 'Admin' : 'Staff'}
+                      </span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-sidebar-foreground/60 flex-shrink-0" />
+                  </>
+                )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -229,14 +285,31 @@ export function DashboardLayout() {
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
         <header className="flex h-16 items-center justify-between gap-4 border-b bg-card px-4 lg:px-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            
+            {/* Desktop sidebar toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden lg:flex h-9 w-9"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {sidebarCollapsed ? (
+                <PanelLeft className="h-4 w-4" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
 
           <div className="flex-1" />
 
