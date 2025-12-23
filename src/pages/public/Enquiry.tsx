@@ -53,11 +53,22 @@ const sources = [
   { value: 'other', label: 'Other' },
 ];
 
-const callTimes = [
-  'Morning (9 AM - 12 PM)',
-  'Afternoon (12 PM - 5 PM)',
-  'Evening (5 PM - 9 PM)',
-];
+// Generate 30-minute time slots from 6:00 AM to 10:00 PM
+const generateTimeSlots = () => {
+  const slots = [];
+  for (let hour = 6; hour <= 22; hour++) {
+    const hourStr = hour.toString().padStart(2, '0');
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+    slots.push({ value: `${hourStr}:00`, label: `${displayHour}:00 ${period}` });
+    if (hour < 22) {
+      slots.push({ value: `${hourStr}:30`, label: `${displayHour}:30 ${period}` });
+    }
+  }
+  return slots;
+};
+
+const timeSlots = generateTimeSlots();
 
 export default function Enquiry() {
   const navigate = useNavigate();
@@ -281,10 +292,10 @@ export default function Enquiry() {
                       <SelectTrigger>
                         <SelectValue placeholder="Select time slot" />
                       </SelectTrigger>
-                      <SelectContent>
-                        {callTimes.map((time) => (
-                          <SelectItem key={time} value={time}>
-                            {time}
+                      <SelectContent className="max-h-60">
+                        {timeSlots.map((slot) => (
+                          <SelectItem key={slot.value} value={slot.value}>
+                            {slot.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
