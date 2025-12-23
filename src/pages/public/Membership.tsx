@@ -1,75 +1,50 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check, Star } from 'lucide-react';
+import { Check, Star, Loader2 } from 'lucide-react';
 
-const plans = [
-  {
-    name: 'Basic',
-    duration: '1 Month',
-    price: 1999,
-    originalPrice: null,
-    features: [
-      'Full gym access',
-      'Cardio equipment',
-      'Locker & shower',
-      'Free parking',
-    ],
-    popular: false,
-  },
-  {
-    name: 'Standard',
-    duration: '3 Months',
-    price: 4999,
-    originalPrice: 5997,
-    features: [
-      'Everything in Basic',
-      'Group classes access',
-      'Fitness assessment',
-      'Diet consultation',
-    ],
-    popular: false,
-  },
-  {
-    name: 'Premium',
-    duration: '6 Months',
-    price: 8999,
-    originalPrice: 11994,
-    features: [
-      'Everything in Standard',
-      '2 PT sessions/month',
-      'Nutrition plan',
-      'Progress tracking',
-      'Priority booking',
-    ],
-    popular: true,
-  },
-  {
-    name: 'Elite',
-    duration: '12 Months',
-    price: 14999,
-    originalPrice: 23988,
-    features: [
-      'Everything in Premium',
-      '4 PT sessions/month',
-      'Personal locker',
-      'Guest passes (2/month)',
-      'Free merchandise',
-      'Freeze option (30 days)',
-    ],
-    popular: false,
-  },
-];
-
-const addons = [
-  { name: 'Personal Training (per session)', price: 500 },
-  { name: 'Personal Training (10 sessions)', price: 4500 },
-  { name: 'Yoga Classes (monthly)', price: 999 },
-  { name: 'CrossFit (monthly)', price: 1499 },
-];
+interface MembershipPlan {
+  id: string;
+  name: string;
+  duration_months: number;
+  price: number;
+  description: string | null;
+  is_active: boolean;
+}
 
 export default function Membership() {
+  const [plans, setPlans] = useState<MembershipPlan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const fetchPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('membership_plans')
+        .select('*')
+        .eq('is_active', true)
+        .order('duration_months', { ascending: true });
+
+      if (error) throw error;
+      setPlans((data as MembershipPlan[]) || []);
+    } catch (error) {
+      console.error('Failed to fetch plans:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Find the best value plan (longest duration)
+  const bestValuePlan = plans.reduce((prev, current) => 
+    (current.duration_months > (prev?.duration_months || 0)) ? current : prev
+  , plans[0]);
+
   return (
     <div className="animate-fade-in">
       {/* Hero */}
@@ -87,87 +62,99 @@ export default function Membership() {
       {/* Pricing Cards */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map((plan) => (
-              <Card 
-                key={plan.name} 
-                className={`relative ${plan.popular ? 'border-primary shadow-xl scale-105' : ''}`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <Badge className="gradient-primary text-white gap-1">
-                      <Star className="h-3 w-3" />
-                      Best Value
-                    </Badge>
-                  </div>
-                )}
-                <CardHeader className="text-center pb-4">
-                  <CardTitle className="text-xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.duration}</CardDescription>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <div className="mb-6">
-                    <div className="text-4xl font-bold">₹{plan.price.toLocaleString()}</div>
-                    {plan.originalPrice && (
-                      <div className="text-sm text-muted-foreground line-through">
-                        ₹{plan.originalPrice.toLocaleString()}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : plans.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p>No membership plans available at the moment.</p>
+              <p className="text-sm mt-2">Please check back later or contact us for more information.</p>
+            </div>
+          ) : (
+            <div className={`grid gap-6 ${plans.length <= 2 ? 'md:grid-cols-2 max-w-2xl mx-auto' : plans.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-4'}`}>
+              {plans.map((plan) => {
+                const isBestValue = plan.id === bestValuePlan?.id && plans.length > 1;
+                const monthlyRate = Math.round(plan.price / plan.duration_months);
+                
+                return (
+                  <Card 
+                    key={plan.id} 
+                    className={`relative ${isBestValue ? 'border-primary shadow-xl scale-105' : ''}`}
+                  >
+                    {isBestValue && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                        <Badge className="gradient-primary text-white gap-1">
+                          <Star className="h-3 w-3" />
+                          Best Value
+                        </Badge>
                       </div>
                     )}
-                    {plan.originalPrice && (
-                      <Badge variant="secondary" className="mt-2">
-                        Save ₹{(plan.originalPrice - plan.price).toLocaleString()}
-                      </Badge>
-                    )}
-                  </div>
-                  <ul className="space-y-3 text-left mb-6">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link to="/enquiry">
-                    <Button 
-                      className={`w-full ${plan.popular ? 'gradient-primary' : ''}`}
-                      variant={plan.popular ? 'default' : 'outline'}
-                    >
-                      Get Started
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Add-ons */}
-      <section className="py-20 bg-muted">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Add-on Services</h2>
-            <p className="text-muted-foreground">Enhance your membership with specialized programs</p>
-          </div>
-          <div className="max-w-2xl mx-auto">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  {addons.map((addon) => (
-                    <div key={addon.name} className="flex justify-between items-center py-3 border-b last:border-0">
-                      <span>{addon.name}</span>
-                      <span className="font-semibold">₹{addon.price.toLocaleString()}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                    <CardHeader className="text-center pb-4">
+                      <CardTitle className="text-xl">{plan.name}</CardTitle>
+                      <CardDescription>
+                        {plan.duration_months} month{plan.duration_months > 1 ? 's' : ''}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="text-center">
+                      <div className="mb-6">
+                        <div className="text-4xl font-bold">₹{plan.price.toLocaleString()}</div>
+                        {plan.duration_months > 1 && (
+                          <div className="text-sm text-muted-foreground mt-1">
+                            ₹{monthlyRate.toLocaleString()}/month
+                          </div>
+                        )}
+                      </div>
+                      {plan.description && (
+                        <p className="text-sm text-muted-foreground mb-6 text-left">
+                          {plan.description}
+                        </p>
+                      )}
+                      <ul className="space-y-3 text-left mb-6">
+                        <li className="flex items-start gap-2">
+                          <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                          <span className="text-sm">Full gym access</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                          <span className="text-sm">All equipment included</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                          <span className="text-sm">Locker & shower facilities</span>
+                        </li>
+                        {plan.duration_months >= 6 && (
+                          <li className="flex items-start gap-2">
+                            <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                            <span className="text-sm">Free fitness assessment</span>
+                          </li>
+                        )}
+                        {plan.duration_months >= 12 && (
+                          <li className="flex items-start gap-2">
+                            <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                            <span className="text-sm">Personal training session</span>
+                          </li>
+                        )}
+                      </ul>
+                      <Link to="/enquiry">
+                        <Button 
+                          className={`w-full ${isBestValue ? 'gradient-primary' : ''}`}
+                          variant={isBestValue ? 'default' : 'outline'}
+                        >
+                          Get Started
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-20">
+      <section className="py-20 bg-muted">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Not Sure Which Plan?</h2>
           <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">

@@ -38,6 +38,7 @@ const navItems = [
   { to: '/dashboard/lead-calendar', icon: CalendarDays, label: 'Schedule' },
   { to: '/dashboard/members', icon: Users, label: 'Members' },
   { to: '/dashboard/staff', icon: UsersRound, label: 'Staff' },
+  { to: '/dashboard/membership-plans', icon: Dumbbell, label: 'Manage Plans' },
   { 
     to: '/dashboard/reports', 
     icon: BarChart3, 
