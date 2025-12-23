@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, UserPlus, TrendingUp, DollarSign, UserCheck, UserX, Target, Activity } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from 'recharts';
 import { DateRangeFilter } from '@/components/dashboard/DateRangeFilter';
-import { QuickActions } from '@/components/dashboard/QuickActions';
+
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
 import { UpcomingFollowUps } from '@/components/dashboard/UpcomingFollowUps';
 import { ExpiringMemberships } from '@/components/dashboard/ExpiringMemberships';
@@ -211,8 +211,6 @@ export default function Dashboard() {
         <DateRangeFilter startDate={startDate} endDate={endDate} onDateChange={handleDateChange} />
       </div>
 
-      {/* Quick Actions */}
-      <QuickActions />
 
       {/* Stats Grid */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
