@@ -26,7 +26,7 @@ export function PublicNavbar() {
             <div className="gradient-primary p-2 rounded-lg">
               <Dumbbell className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">SmartGym</span>
+            <span className="text-xl font-bold">Toneup Gym</span>
           </Link>
 
           {/* Desktop Nav */}

@@ -97,7 +97,7 @@ export default function Auth() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full gradient-primary">
             <Dumbbell className="h-8 w-8 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl font-bold">SmartGym ERP</CardTitle>
+          <CardTitle className="text-2xl font-bold">Toneup Gym ERP</CardTitle>
           <CardDescription>Sign in to manage your gym</CardDescription>
         </CardHeader>
         <CardContent>

@@ -43,7 +43,7 @@ const stats = [
 
 export default function Home() {
   const whatsappNumber = '919876543210';
-  const whatsappMessage = encodeURIComponent('Hi! I am interested in joining SmartGym. Please share more details.');
+  const whatsappMessage = encodeURIComponent('Hi! I am interested in joining Toneup Gym. Please share more details.');
 
   return (
     <div className="animate-fade-in">
@@ -59,7 +59,7 @@ export default function Home() {
               <span className="text-gradient">Elevate Your Life</span>
             </h1>
             <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl">
-              Join SmartGym and experience world-class facilities, expert guidance, 
+              Join Toneup Gym and experience world-class facilities, expert guidance, 
               and a community that motivates you to achieve your fitness goals.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -102,7 +102,7 @@ export default function Home() {
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose SmartGym?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Toneup Gym?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               We provide everything you need to achieve your fitness goals in one place.
             </p>
@@ -128,7 +128,7 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start Your Journey?</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-            Join hundreds of members who have transformed their lives with SmartGym.
+            Join hundreds of members who have transformed their lives with Toneup Gym.
             Your first step towards a healthier you starts here.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

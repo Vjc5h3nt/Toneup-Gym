@@ -12,7 +12,7 @@ export function PublicFooter() {
               <div className="gradient-primary p-2 rounded-lg">
                 <Dumbbell className="h-6 w-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">SmartGym</span>
+              <span className="text-xl font-bold">Toneup Gym</span>
             </div>
             <p className="text-sm text-sidebar-foreground/70">
               Transform your body, elevate your mind. Join the fitness revolution today.
@@ -52,7 +52,7 @@ export function PublicFooter() {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary" />
-                <span>info@smartgym.com</span>
+                <span>info@toneupgym.com</span>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-primary mt-0.5" />
@@ -82,7 +82,7 @@ export function PublicFooter() {
         </div>
 
         <div className="border-t border-sidebar-border mt-8 pt-8 text-center text-sm text-sidebar-foreground/60">
-          <p>&copy; {new Date().getFullYear()} SmartGym. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Toneup Gym. All rights reserved.</p>
         </div>
       </div>
     </footer>

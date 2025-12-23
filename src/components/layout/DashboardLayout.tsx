@@ -130,7 +130,7 @@ export function DashboardLayout() {
           </div>
           {!sidebarCollapsed && (
             <div className="overflow-hidden">
-              <h1 className="font-semibold text-sidebar-foreground">SmartGym</h1>
+              <h1 className="font-semibold text-sidebar-foreground">Toneup Gym</h1>
               <p className="text-xs text-sidebar-foreground/60">ERP System</p>
             </div>
           )}

@@ -1,4 +1,4 @@
-// Database types for SmartGym ERP
+// Database types for Toneup Gym ERP
 export type AppRole = 'admin' | 'staff';
 export type LeadStatus = 'new' | 'contacted' | 'hot' | 'warm' | 'cold' | 'converted' | 'lost';
 export type LeadSource = 'website' | 'instagram' | 'qr' | 'referral' | 'walk_in' | 'other';

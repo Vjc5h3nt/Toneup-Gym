@@ -31,7 +31,7 @@ export default function About() {
       <section className="py-20 gradient-dark text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">About SmartGym</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">About Toneup Gym</h1>
             <p className="text-lg text-white/80">
               Building stronger bodies and minds since 2014
             </p>
@@ -47,7 +47,7 @@ export default function About() {
               <h2 className="text-3xl font-bold mb-6">Our Story</h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  SmartGym was founded in 2014 with a simple mission: to create a fitness 
+                  Toneup Gym was founded in 2014 with a simple mission: to create a fitness 
                   environment where everyone feels welcome and empowered to achieve their goals.
                 </p>
                 <p>
