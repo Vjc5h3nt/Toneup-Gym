@@ -14,6 +14,7 @@ import LeadCalendar from "./pages/LeadCalendar";
 import Members from "./pages/Members";
 import StaffPage from "./pages/Staff";
 import Reports from "./pages/Reports";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 // Public pages
 import Home from "./pages/public/Home";
@@ -64,6 +65,7 @@ const App = () => (
               <Route path="members" element={<Members />} />
               <Route path="staff" element={<StaffPage />} />
               <Route path="reports" element={<Reports />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />
